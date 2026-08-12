@@ -1,10 +1,13 @@
-package com.ecommerce.auth.service;
+package com.ecommerce.auth.service.impl;
 
+import com.ecommerce.auth.dto.request.LoginRequest;
 import com.ecommerce.auth.dto.request.RegisterRequest;
+import com.ecommerce.auth.dto.response.LoginResponse;
 import com.ecommerce.auth.dto.response.RegisterResponse;
 
 import com.ecommerce.auth.exception.EmailAlreadyExistException;
 import com.ecommerce.auth.repository.UserRepository;
+import com.ecommerce.auth.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,7 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import static org.mockito.Mockito.never;
+
 import java.util.Optional;
 
 
@@ -31,6 +36,8 @@ public class AuthServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @InjectMocks
     private AuthServiceImpl authService;
+    @Mock
+    private JwtService jwtService;
 
     @Test
     void testRegisterUser() {
@@ -88,5 +95,80 @@ public class AuthServiceImplTest {
         );
         verify(userRepository, never()).save(any(User.class));
     }
+
+
+    @Test
+    void login_WithValidCredential_shouldReturnLoginResponse() {
+        LoginRequest request = new LoginRequest();
+        request.setEmail("vikram@gmail.com");
+        request.setPassword("Vikram@123");
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("vikram@gmail.com");
+        user.setPassword("$2a$10$some-bcrypt-hash");
+
+        when(userRepository.findByEmail("vikram@gmail.com"))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("Vikram@123", user.getPassword()))
+                .thenReturn(true);
+
+        when(jwtService.generateToken(user.getEmail()))
+                .thenReturn("fake-jwt-token");
+
+        LoginResponse response = authService.login(request);
+
+        assertEquals("fake-jwt-token", response.getAccessToken());
+        verify(jwtService).generateToken("vikram@gmail.com");
+    }
+
+    @Test
+    void login_WrongPassword_ShouldThrowException() {
+        LoginRequest request = new LoginRequest();
+        request.setEmail("vikram@gmail.com");
+        request.setPassword("WrongPassword");
+
+        User user = new User();
+        user.setId(1L);
+        user.setPassword("$2a$10$some-bcrypt-hash");
+        user.setEmail("vikram@gmail.com");
+
+        when(userRepository.findByEmail("vikram@gmail.com")).thenReturn(Optional.of(user));
+        when(!passwordEncoder.matches("WrongPassword", user.getPassword()))
+                .thenReturn(false);
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> authService.login(request)
+        );
+
+        assertEquals(
+                "Invalid email or password",
+                exception.getMessage()
+        );
+
+
+    }
+
+    @Test
+    void login_WhenUserDoesNotExist_ShouldThrowException() {
+        LoginRequest request = new LoginRequest();
+
+        request.setEmail("unknown@gmail.com");
+        request.setPassword("Password123");
+        when(userRepository.findByEmail("unknown@gmail.com"))
+                .thenReturn(Optional.empty());
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> authService.login(request)
+        );
+
+        assertEquals(
+                "Invalid email or password",
+                exception.getMessage()
+        );
+    }
+
+
 }
 
