@@ -89,6 +89,9 @@ public class AuthControllerTest {
                         .value("password must be at least 8 character"));
     }
 
+
+
+
     @Test
     void registerUser_WhenRequestIsValid_ShouldReturnSuccess() throws Exception {
         String json = """
@@ -140,4 +143,7 @@ public class AuthControllerTest {
                         .value("User already registered"))
                 .andExpect(jsonPath("$.errors").doesNotExist());
     }
+
+
+
 }
