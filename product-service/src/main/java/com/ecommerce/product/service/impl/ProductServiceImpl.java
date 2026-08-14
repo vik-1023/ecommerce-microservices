@@ -16,9 +16,12 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+    private static final Set<String> ALLOWED_SORT_FIELDS =
+            Set.of("id", "name", "price", "quantity", "category");
     private final ProductRepository productRepository;
 
     public ProductServiceImpl(ProductRepository productRepository) {
@@ -72,6 +75,23 @@ public class ProductServiceImpl implements ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice
     ) {
+
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new IllegalArgumentException("minimum price can not be grater than maximum price");
+        }
+
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: " + sortBy
+            );
+        }
+        if (!direction.equalsIgnoreCase("asc")
+                && !direction.equalsIgnoreCase("desc")) {
+
+            throw new IllegalArgumentException(
+                    "Invalid sort direction: " + direction
+            );
+        }
 
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()

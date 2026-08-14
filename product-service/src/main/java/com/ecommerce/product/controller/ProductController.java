@@ -4,14 +4,18 @@ import com.ecommerce.product.dto.request.ProductRequest;
 import com.ecommerce.product.dto.response.ProductResponse;
 import com.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -36,8 +40,11 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0")
+            @Min(0) int page,
+            @RequestParam(defaultValue = "10")
+            @Min(1)
+            @Max(100) int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction,
             @RequestParam(required = false) String name,

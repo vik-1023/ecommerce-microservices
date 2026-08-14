@@ -4,7 +4,6 @@ import com.ecommerce.product.entity.Product;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
-import java.util.Locale;
 
 public class ProductSpecification {
 
