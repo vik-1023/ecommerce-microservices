@@ -2,7 +2,6 @@ package com.ecommerce.product.controller;
 
 import com.ecommerce.product.dto.request.ProductRequest;
 import com.ecommerce.product.dto.response.ProductResponse;
-import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -40,9 +39,14 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice
     ) {
-        Page<ProductResponse> response = productService.getAllProducts(page, size, sortBy, direction);
+        Page<ProductResponse> response = productService.getAllProducts(page, size, sortBy, direction,
+                name, category, minPrice, maxPrice);
         return ResponseEntity.ok(response);
     }
 

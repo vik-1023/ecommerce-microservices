@@ -16,7 +16,11 @@ public interface ProductService {
             int page,
             int size,
             String sortBy,
-            String direction);
+            String direction,
+            String name,
+            String category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice);
 
     ProductResponse updateProduct(Long id, ProductRequest request);
 

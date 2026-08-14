@@ -6,10 +6,12 @@ import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.exception.ProductNotFoundException;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.service.ProductService;
+import com.ecommerce.product.specificatio.ProductSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -64,7 +66,12 @@ public class ProductServiceImpl implements ProductService {
             int page,
             int size,
             String sortBy,
-            String direction) {
+            String direction,
+            String name,
+            String category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    ) {
 
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
@@ -72,7 +79,15 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return productRepository.findAll(pageable)
+        Specification<Product> specification =
+                Specification.allOf(
+                        ProductSpecification.hasName(name),
+                        ProductSpecification.hasCategory(category),
+                        ProductSpecification.priceGreaterThanOrEqualTo(minPrice),
+                        ProductSpecification.priceLessThanOrEqualTo(maxPrice)
+                );
+
+        return productRepository.findAll(specification, pageable)
                 .map(product -> ProductResponse.builder()
                         .id(product.getId())
                         .name(product.getName())
