@@ -114,13 +114,13 @@ public class AuthServiceImplTest {
         when(passwordEncoder.matches("Vikram@123", user.getPassword()))
                 .thenReturn(true);
 
-        when(jwtService.generateToken(user.getEmail()))
+        when(jwtService.generateToken(user.getEmail(), "USER"))
                 .thenReturn("fake-jwt-token");
 
         LoginResponse response = authService.login(request);
 
         assertEquals("fake-jwt-token", response.getAccessToken());
-        verify(jwtService).generateToken("vikram@gmail.com");
+        verify(jwtService).generateToken("vikram@gmail.com", "USER");
     }
 
     @Test

@@ -38,7 +38,7 @@ class JwtServiceTest {
     @Test
     void generateToken_ShouldReturnToken() {
 
-        String token = jwtService.generateToken("vikram@gmail.com");
+        String token = jwtService.generateToken("vikram@gmail.com","USER");
 
         assertNotNull(token);
         assertFalse(token.isBlank());
@@ -47,7 +47,7 @@ class JwtServiceTest {
     @Test
     void extractEmail_ShouldReturnCorrectEmail() {
 
-        String token = jwtService.generateToken("vikram@gmail.com");
+        String token = jwtService.generateToken("vikram@gmail.com","USER");
 
         String email = jwtService.extractEmail(token);
 

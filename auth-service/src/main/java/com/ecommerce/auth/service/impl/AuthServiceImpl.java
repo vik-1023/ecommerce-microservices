@@ -34,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyExistException("User already registered");
         }
+
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.builder().email(request.getEmail())
                 .password(encodedPassword)
@@ -56,11 +57,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("Invalid email or password"));
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
             throw new RuntimeException("Invalid email or password");
         }
-        String token = jwtService.generateToken(user.getEmail());
+
+        String token = jwtService.generateToken(
+                user.getEmail(),
+                user.getRole().name()
+        );
+
         return LoginResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")

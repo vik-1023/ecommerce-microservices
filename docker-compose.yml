@@ -48,6 +48,20 @@ services:
     networks:
       - ecommerce-network
 
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - auth-service
+      - product-service
+
+    networks:
+      - ecommerce-network
+
 networks:
   ecommerce-network:
 

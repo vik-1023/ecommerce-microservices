@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: product-service
+              uri: http://product-service:8082
+              predicates:
+                - Path=/api/products/**
+
+            - id: auth-service
+              uri: http://auth-service:8081
+              predicates:
+                - Path=/api/auth/**
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:7fK9mQ2xL8vR4nT6pZ1sW5yH3cJ8dN0aB6gE9uI2oP4rS7tV}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
